@@ -1,0 +1,19 @@
+{
+  "name": "notion-browser-relay",
+  "version": "0.1.0",
+  "description": "Safe Notion-powered browser relay for AI-assisted UI testing and local automation experiments.",
+  "private": false,
+  "license": "MIT",
+  "scripts": {
+    "demo": "python -m http.server 3000"
+  },
+  "keywords": [
+    "notion",
+    "browser-automation",
+    "tampermonkey",
+    "userscript",
+    "ai-testing",
+    "ui-testing",
+    "relay"
+  ]
+}
