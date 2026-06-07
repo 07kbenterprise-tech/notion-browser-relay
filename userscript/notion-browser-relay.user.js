@@ -61,23 +61,57 @@
   };
 
   const FORBIDDEN_COMMAND_PREFIXES = [
-    "SCRIPT::", "EXEC", "COOKIE", "GMREQ::", "PYEXEC::", "PYREQ::", "PYJWT::",
-    "PYSCAN::", "PYSCAPY::", "PYMITM::", "PYWS::"
+    "SCRIPT::",
+    "EXEC",
+    "COOKIE",
+    "GMREQ::",
+    "PYEXEC::",
+    "PYREQ::",
+    "PYJWT::",
+    "PYSCAN::",
+    "PYSCAPY::",
+    "PYMITM::",
+    "PYWS::"
   ];
 
   const FORBIDDEN_TEXT_PATTERNS = [
-    /document\.cookie/i, /\bcookie\b/i, /set-cookie/i, /localStorage/i,
-    /sessionStorage/i, /indexedDB/i, /GM_cookie/i, /eval\s*\(/i,
-    /new\s+Function/i, /Function\s*\(/i, /fetch\s*\(/i, /XMLHttpRequest/i,
-    /WebSocket/i, /password/i, /passwd/i, /secret/i, /token/i, /authorization/i,
-    /bearer\s+/i, /api[-]?key/i, /private[-]?key/i, /ssh-rsa/i,
+    /document\.cookie/i,
+    /\bcookie\b/i,
+    /set-cookie/i,
+    /localStorage/i,
+    /sessionStorage/i,
+    /indexedDB/i,
+    /GM_cookie/i,
+    /eval\s*\(/i,
+    /new\s+Function/i,
+    /Function\s*\(/i,
+    /fetch\s*\(/i,
+    /XMLHttpRequest/i,
+    /WebSocket/i,
+    /password/i,
+    /passwd/i,
+    /secret/i,
+    /token/i,
+    /authorization/i,
+    /bearer\s+/i,
+    /api[_-]?key/i,
+    /private[_-]?key/i,
+    /ssh-rsa/i,
     /BEGIN\s+(RSA|OPENSSH|PRIVATE)/i
   ];
 
-  const SAFE_COMMANDS = ["PING", "GET_PAGE_TITLE", "GET_SELECTED_TEXT", "GET_DEMO_DOM"];
+  const SAFE_COMMANDS = [
+    "PING",
+    "GET_PAGE_TITLE",
+    "GET_SELECTED_TEXT",
+    "GET_DEMO_DOM"
+  ];
 
   function parseCsv(value) {
-    return String(value || "").split(",").map(v => v.trim()).filter(Boolean);
+    return String(value || "")
+      .split(",")
+      .map(v => v.trim())
+      .filter(Boolean);
   }
 
   function clampString(value, maxLength) {
