@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Notion Browser Relay CLI - Safe Edition
+"""
+Notion Browser Relay CLI - Safe Edition
 
 This CLI talks only to the Notion API and helps send safe demo commands to a
 private Notion page used as a command/result channel.
@@ -69,8 +70,8 @@ FORBIDDEN_TEXT_PATTERNS = [
     r"token",
     r"authorization",
     r"bearer\s+",
-    r"api[-]?key",
-    r"private[-]?key",
+    r"api[_-]?key",
+    r"private[_-]?key",
     r"ssh-rsa",
     r"BEGIN\s+(RSA|OPENSSH|PRIVATE)",
 ]
@@ -133,20 +134,17 @@ def is_forbidden_command(command: str) -> bool:
 
 def redact_sensitive_text(text: str) -> str:
     value = str(text or "")
-
     replacements = [
         (r"Bearer\s+[A-Za-z0-9._~+/=-]+", "Bearer [REDACTED]"),
         (r"ntn_[A-Za-z0-9]+", "ntn_[REDACTED]"),
         (r"sk-[A-Za-z0-9]+", "sk-[REDACTED]"),
-        (r"api[_-]?key\s*[:=]\s*[\"']?[^\"'\s]+", "api_key=[REDACTED]"),
-        (r"token\s*[:=]\s*[\"']?[^\"'\s]+", "token=[REDACTED]"),
-        (r"password\s*[:=]\s*[\"']?[^\"'\s]+", "password=[REDACTED]"),
-        (r"secret\s*[:=]\s*[\"']?[^\"'\s]+", "secret=[REDACTED]"),
+        (r"api[_-]?key\s*[:=]\s*[\"']?[^\s\"']+", "api_key=[REDACTED]"),
+        (r"token\s*[:=]\s*[\"']?[^\s\"']+", "token=[REDACTED]"),
+        (r"password\s*[:=]\s*[\"']?[^\s\"']+", "password=[REDACTED]"),
+        (r"secret\s*[:=]\s*[\"']?[^\s\"']+", "secret=[REDACTED]"),
     ]
-
     for pattern, repl in replacements:
         value = re.sub(pattern, repl, value, flags=re.IGNORECASE)
-
     return value
 
 
@@ -166,7 +164,9 @@ def validate_selector(selector: str) -> None:
     if contains_forbidden_text(s):
         raise RelayError("Selector contains forbidden sensitive patterns")
     if not any(s.startswith(prefix) for prefix in ALLOWED_SELECTOR_PREFIXES):
-        raise RelayError("Selector is not allowed. Use prefixes like #demo-, .demo-, or [data-demo-")
+        raise RelayError(
+            "Selector is not allowed. Use prefixes like #demo-, .demo-, or [data-demo-"
+        )
 
 
 def validate_command(command: str) -> None:
@@ -179,10 +179,8 @@ def validate_command(command: str) -> None:
         raise RelayError("Forbidden command prefix")
     if contains_forbidden_text(value):
         raise RelayError("Command contains forbidden sensitive patterns")
-
     if value in SAFE_COMMANDS:
         return
-
     if value.startswith("SET_DEMO_TEXT::"):
         payload = value[len("SET_DEMO_TEXT::"):].strip()
         decoded = b64d(payload)
@@ -191,29 +189,24 @@ def validate_command(command: str) -> None:
         if contains_forbidden_text(decoded):
             raise RelayError("Decoded text payload contains forbidden sensitive patterns")
         return
-
     if value.startswith("CLICK_DEMO_BUTTON::"):
         payload = value[len("CLICK_DEMO_BUTTON::"):].strip()
         selector = b64d(payload)
         validate_selector(selector)
         return
-
     if value.startswith("HIGHLIGHT_SELECTOR::"):
         payload = value[len("HIGHLIGHT_SELECTOR::"):].strip()
         selector = b64d(payload)
         validate_selector(selector)
         return
-
     if value in {"CZEKAM", "WAITING", "RUNNING..."}:
         return
-
     raise RelayError("Unsupported command")
 
 
 def notion_request(method: str, path: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     require_config()
     url = NOTION_API + path
-
     try:
         response = requests.request(
             method=method,
@@ -224,13 +217,12 @@ def notion_request(method: str, path: str, payload: Optional[Dict[str, Any]] = N
         )
     except requests.RequestException as exc:
         raise RelayError(f"Notion request failed: {exc}") from exc
-
     if response.status_code >= 400:
-        raise RelayError(f"Notion API error HTTP {response.status_code}: {response.text[:400]}")
-
+        raise RelayError(
+            f"Notion API error HTTP {response.status_code}: {response.text[:400]}"
+        )
     if not response.text.strip():
         return {}
-
     try:
         return response.json()
     except json.JSONDecodeError as exc:
@@ -245,8 +237,10 @@ def get_title() -> str:
             return ""
         return title_arr[0].get("plain_text", "")
     except Exception as exc:
-        raise RelayError(f"Cannot read title property '{NOTION_TITLE_PROPERTY}'. "
-                         f"Check NOTION_TITLE_PROPERTY and page permissions.") from exc
+        raise RelayError(
+            f"Cannot read title property '{NOTION_TITLE_PROPERTY}'. "
+            f"Check NOTION_TITLE_PROPERTY and page permissions."
+        ) from exc
 
 
 def set_title(text: str) -> None:
@@ -258,7 +252,7 @@ def set_title(text: str) -> None:
                     {
                         "type": "text",
                         "text": {
-                            "content": value,
+                            "content": value
                         },
                     }
                 ]
@@ -283,11 +277,9 @@ def decode_result_title(title: str) -> Dict[str, Any]:
 def print_result(title: str) -> None:
     parsed = decode_result_title(title)
     decoded = redact_sensitive_text(parsed["decoded"])
-
     print("=" * 70)
     print(parsed["type"])
     print("=" * 70)
-
     try:
         obj = json.loads(decoded)
         print(json.dumps(obj, indent=2, ensure_ascii=False)[:MAX_RESULT_PRINT])
@@ -299,7 +291,6 @@ def send_command(command: str, wait: bool = False, timeout: float = 30.0) -> Non
     validate_command(command)
     print(f"[send] {command[:120]}")
     set_title(command)
-
     if wait:
         wait_for_result(timeout)
 
@@ -308,19 +299,15 @@ def wait_for_result(timeout: float = 30.0) -> None:
     print(f"[wait] Waiting up to {timeout:.1f}s for RESULT:: or ERROR::")
     deadline = time.time() + timeout
     last_seen = None
-
     while time.time() < deadline:
         title = get_title()
         if title != last_seen:
             print(f"[title] {title[:120]}")
             last_seen = title
-
         if title.startswith("RESULT::") or title.startswith("ERROR::"):
             print_result(title)
             return
-
         time.sleep(POLL_SEC)
-
     raise RelayError("Timed out waiting for result")
 
 
@@ -346,7 +333,6 @@ def command_set_text(args: argparse.Namespace) -> None:
         raise RelayError("Text payload is too large")
     if contains_forbidden_text(text):
         raise RelayError("Text contains forbidden sensitive patterns")
-
     send_command("SET_DEMO_TEXT::" + b64e(text), wait=args.wait, timeout=args.timeout)
 
 
@@ -375,14 +361,15 @@ def command_reset(args: argparse.Namespace) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Safe CLI for Notion Browser Relay")
+    parser = argparse.ArgumentParser(
+        description="Safe CLI for Notion Browser Relay"
+    )
     parser.add_argument(
         "--timeout",
         type=float,
         default=30.0,
         help="Timeout for commands that wait for results",
     )
-
     sub = parser.add_subparsers(dest="command", required=True)
 
     def add_wait_flags(p: argparse.ArgumentParser) -> None:
@@ -439,7 +426,6 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
-
     try:
         args.func(args)
         return 0
