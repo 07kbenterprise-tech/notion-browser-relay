@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Notion Browser Relay Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 760px;
+      margin: 40px auto;
+      padding: 0 20px;
+      line-height: 1.5;
+    }
+    code {
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .card {
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 20px;
+      background: #f8fafc;
+    }
+    #demo-output {
+      min-height: 40px;
+      padding: 12px;
+      background: white;
+      border: 1px dashed #94a3b8;
+      border-radius: 8px;
+    }
+    #demo-button {
+      border: 0;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    #demo-box {
+      padding: 14px;
+      border-radius: 8px;
+      background: #e0f2fe;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Notion Browser Relay Demo</h1>
+  <p>
+    This page is a safe local/demo target for the Notion Browser Relay userscript.
+  </p>
+
+  <div class="card" data-demo>
+    <h2>Demo output</h2>
+    <div id="demo-output" class="demo-output" data-demo-output>
+      Waiting for relay command...
+    </div>
+  </div>
+
+  <div class="card" data-demo>
+    <h2>Demo button</h2>
+    <button id="demo-button" class="demo-button" data-demo-click type="button">
+      Click me through relay
+    </button>
+    <p id="demo-click-result" class="demo-click-result">
+      Button has not been clicked yet.
+    </p>
+  </div>
+
+  <div id="demo-box" class="demo-box" data-demo>
+    This is a demo box that can be highlighted with <code>HIGHLIGHT_SELECTOR</code>.
+  </div>
+
+  <script>
+    document.getElementById("demo-button").addEventListener("click", function () {
+      document.getElementById("demo-click-result").textContent =
+        "Button clicked at " + new Date().toLocaleTimeString();
+    });
+  </script>
+</body>
+</html>
